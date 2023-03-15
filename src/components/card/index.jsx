@@ -1,13 +1,16 @@
+import cn from 'classnames';
+
 import "./styles.css";
-import likeIcon from '../../images/save.svg';
+import likeIcon from "../../images/save.svg";
 
 export function Card({
-  name, 
-  price, 
-  discount, 
-  wight, 
-  description, 
+  name,
+  price,
+  discount,
+  wight,
+  description,
   picture,
+  tags,
   ...props
 }) {
   const discount_price = Math.round(price - (price * discount) / 100);
@@ -18,9 +21,15 @@ export function Card({
         {discount !== 0 && (
           <span className="card__discount">{`-${discount}%`}</span>
         )}
+        {tags && tags.map(tagName => (
+          <span key={tagName} className={cn('tag', { [`tag_type_${tagName}`]: true })}>
+            {tagName}
+          </span>
+        )
+        )}
       </div>
       <div className="card__sticky card__sticky_type_top-right">
-        <button className="card__favorite">
+        <button className="card_favorite">
           <img src={likeIcon} alt="" className="card__favorite-icon" />
         </button>
       </div>
