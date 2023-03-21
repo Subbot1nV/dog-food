@@ -9,77 +9,77 @@ import { Logo } from "../logo";
 import { Search } from "../search";
 import { Button } from "../button";
 // import styled from 'styled-components';
+import api from '../../utils/api';
+import { useDebounce } from "../../hooks/useDebounce";
+import { isLiked } from '../../utils/products';
+
 
 export function App() {
-    const [cards, setCards] = useState(dataCard);
-    const [searchQuery, setSearchQuery] = useState("");
-  
-    function handleRequest() {
-      const filterCards = dataCard.filter((item) =>
-        item.name.includes(searchQuery)
-      );
-      setCards(filterCards);
-    }
-  
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      handleRequest();
-    }
-  
-    function handleInputChange(dataInput) {
-      setSearchQuery(dataInput);
-    }
-  
-    useEffect(() => {
-      handleRequest();
-    }, [searchQuery]);
-    const margin = 40;
-    const headerStyle = {
-    color: "red",
-    margin: `${margin}px`,
+  const [cards, setCards] = useState([]);
+  const [currentUser, setCurrentUser] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debounceSearchQuery = useDebounce(searchQuery, 300)
+  function handleRequest() {
+    // const filterCards = dataCard.filter((item) =>
+    //   item.name.includes(searchQuery)
+    // );
+    // setCards(filterCards);
+
+    api.search(debounceSearchQuery)
+      .then((dataSearch) => {
+        setCards(dataSearch);
+        // console.log(data);
+      })
   }
 
-  // const Title = styled.h1`
-  //   font-size: 1.5em;
-  //   text-align: center;
-  //   color: palevioletred;
-  // `;
-
-  // const Button = styled.button`
-  //   background: ${props => props.primary ? "palevioletred" : "white"};
-  //   color: ${props => props.primary ? "white" : "palevioletred"};
-
-  //   font-size: 1em;
-  //   margin: 1em;
-  //   padding: 0.25em 1em;
-  //   border: 2px solid palevioletred;
-  //   border-radius: 3px;
-  // `;
-
-  // const TomatoButton = styled(Button)`
-  //   color: tomato;
-  //   border-color: tomato;
-  // `;
-
-  // const StyledLink = styled(Logo)`
-  //   color: palevioletred;
-  //   font-weight: bold;
-  // `;
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    handleRequest();
+  }
 
   
-  // const LayoutStyled = styled.div`
-  //   .container  {
-  //     background: red;
+  function handleInputChange(dataInput) {
+    setSearchQuery(dataInput);
+  }
 
-  //     &:hover {
-  //       background: green;
-  //     }
-  //   }
-  // `
+  function handleUpdateUser(dataUserUpdate) {
+    api.setUserInfo(dataUserUpdate)
+      .then((updateUserFromServer) => {
+        setCurrentUser(updateUserFromServer)
+      })
+  }
+
+  function handleProductLike(product) {
+    const like = isLiked(product.likes, currentUser._id)
+    api.changeLikeProductStatus(product._id, like)
+      .then((updateCard) => {
+        const newProducts = cards.map(cardState => {
+          return cardState._id === updateCard._id ? updateCard : cardState
+        })
+
+        setCards(newProducts)
+      })
+  }
+  
+
+
+    useEffect(() => {
+      handleRequest();
+    }, [debounceSearchQuery]);
+
+
+    useEffect(() => {
+      api.getAllInfo()
+       .then(([productsData, userInfoData]) => {
+        setCurrentUser(userInfoData);
+        setCards(productsData.products);
+      })
+      .catch(err => console.log(err))
+    }, [])
 
     return (
       <>
-        <Header>
+        <Header user={currentUser} oneUpdateUser={handleUpdateUser}>
           <Logo />
           <Search
             handleFormSubmit={handleFormSubmit}
@@ -98,9 +98,9 @@ export function App() {
 
         {/* <Button htmlType="button">Купить</Button> */}
           <Sort/>
-          <CardList goods={cards} />
+          <CardList goods={cards} onProductLike={handleProductLike} currentUser={currentUser} />
         </main>
         <Footer />
       </>
     );
-  }
+   }
