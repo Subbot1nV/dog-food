@@ -1,9 +1,9 @@
-import "./styles.css";
+import s from "./styles.module.css";
 
 export function Spinner() {
-    return (
-        <>
-        
-        </>
-    );
+  return (
+    <>
+      <div className={s.spinner}></div>
+    </>
+  );
 }
