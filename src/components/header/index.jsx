@@ -15,7 +15,6 @@ export function Header({ children }) {
   const { currentUser, onUpdateUser } = useContext(UserContext);
   const { favorites } = useContext(CardsContext)
   const { toggleTheme } = useContext(ThemeContext)
-  console.log('currentUser', currentUser);
 
   const handleClickButtonEdit = () => {
     onUpdateUser({ name: 'Вася', about: 'Ментор' })
@@ -31,6 +30,9 @@ export function Header({ children }) {
             {favorites.length !== 0 && <span className={s.iconBubble}>{favorites.length}</span>}
           </Link>
         </div>
+
+
+
 
 
         {/* <span>{currentUser?.name}: {currentUser?.about}</span>
